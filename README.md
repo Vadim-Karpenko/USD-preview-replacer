@@ -15,7 +15,7 @@ Omniverse scene saved into __usda__ file with exported preview surface.
 1. Install Python from [python.org](https://www.python.org/)
 2. Open CMD console
     - ### MAC
-        Developer Tools". This will open the developer console in a new window.
+        To open the console on the Mac desktop app, click "Help" in the Mac menu bar, then select "Developer Tools". This will open the developer console in a new window.
 
     - ### Windows
         Press Win + R, type `cmd` and hit Enter
