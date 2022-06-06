@@ -1,0 +1,156 @@
+﻿mdl 1.6;
+
+import ::math::*;
+import ::state::*;
+import ::tex::*;
+import ::anno::*;
+using .::OmniUe4Function import *;
+using .::OmniUe4Translucent import *;
+
+export annotation sampler_color();
+export annotation sampler_normal();
+export annotation sampler_grayscale();
+export annotation sampler_alpha();
+export annotation sampler_masks();
+export annotation sampler_distancefield();
+export annotation dither_masked_off();
+export annotation world_space_normal();
+
+export material MI_LampPost01Glass(
+	uniform texture_2d Normal = texture_2d("./Textures/T_B_N.png",::tex::gamma_linear)
+	[[
+		anno::display_name("Normal"),
+		anno::ui_order(32),
+		anno::in_group("Base_Textures"),
+		sampler_normal()
+	]],
+	float4 Emissive = float4(0.0,0.0,0.0,0.0)
+	[[
+		anno::display_name("Emissive"),
+		anno::ui_order(32)
+	]],
+	float Emissive_sp = 1.0
+	[[
+		anno::display_name("Emissive"),
+		anno::ui_order(32)
+	]],
+	float4 diffusecolor = float4(0.05098,0.066667,0.07451,0.0)
+	[[
+		anno::display_name("diffuse color"),
+		anno::ui_order(32)
+	]],
+	float4 diffuse2color = float4(0.05098,0.066667,0.07451,0.0)
+	[[
+		anno::display_name("diffuse2 color"),
+		anno::ui_order(32)
+	]],
+	float FresnelPower = 1.5
+	[[
+		anno::display_name("Fresnel Power"),
+		anno::ui_order(32)
+	]],
+	float4 Dirtcolor = float4(0.119538,0.095307,0.08022,1.0)
+	[[
+		anno::display_name("Dirt color"),
+		anno::ui_order(32)
+	]],
+	uniform texture_2d DirtMask = texture_2d("./Textures/T_MASK1.png",::tex::gamma_srgb)
+	[[
+		anno::display_name("Dirt Mask"),
+		anno::ui_order(32),
+		sampler_color()
+	]],
+	float Dirtstr = 1.0
+	[[
+		anno::display_name("Dirt str"),
+		anno::ui_order(32)
+	]],
+	float Metallic = 0.1
+	[[
+		anno::display_name("Metallic"),
+		anno::ui_order(32)
+	]],
+	float spec = 30.0
+	[[
+		anno::display_name("spec"),
+		anno::ui_order(32)
+	]],
+	float DirtSpec = 0.5
+	[[
+		anno::display_name("Dirt Spec"),
+		anno::ui_order(32)
+	]],
+	float Roughness = 0.1
+	[[
+		anno::display_name("Roughness"),
+		anno::ui_order(32)
+	]],
+	float DirtRoughness = 0.8
+	[[
+		anno::display_name("Dirt Roughness"),
+		anno::ui_order(32)
+	]],
+	float MinOpacity = 0.35
+	[[
+		anno::display_name("Min Opacity"),
+		anno::ui_order(32)
+	]],
+	float MaxOpacity = 0.9
+	[[
+		anno::display_name("Max Opacity"),
+		anno::ui_order(32)
+	]],
+	float DirtOpacity = 1.0
+	[[
+		anno::display_name("Dirt Opacity"),
+		anno::ui_order(32)
+	]],
+	int MaxTexCoordIndex = 3
+	[[
+		anno::hidden()
+	]])
+ = 
+	let {
+	float3 WorldPositionOffset_mdl = float3(0.0,0.0,0.0);
+	float2 CustomizedUV0_mdl = float2(state::texture_coordinate(math::min(0,MaxTexCoordIndex)).x,1.0-state::texture_coordinate(math::min(0,MaxTexCoordIndex)).y);
+
+	float4 Local0 = ::unpack_normal_map(tex::lookup_float4(Normal,float2(CustomizedUV0_mdl.x,1.0-CustomizedUV0_mdl.y),tex::wrap_repeat,tex::wrap_repeat));
+	float3 Local1 = (float3(Local0.x,Local0.y,Local0.z) * float3(1.0,-1.0,1.0));
+
+	float3 Normal_mdl = Local1;
+
+	float3 Local2 = (float3(Emissive.x,Emissive.y,Emissive.z) * Emissive_sp);
+	float Local3 = ::fresnel(FresnelPower, 0.04, ::pixel_normal_world_space(true));
+	float3 Local4 = math::lerp(float3(diffusecolor.x,diffusecolor.y,diffusecolor.z),float3(diffuse2color.x,diffuse2color.y,diffuse2color.z),Local3);
+	float4 Local5 = tex::lookup_float4(DirtMask,float2(CustomizedUV0_mdl.x,1.0-CustomizedUV0_mdl.y),tex::wrap_repeat,tex::wrap_repeat);
+	float Local6 = (Local5.w * Dirtstr);
+	float Local7 = math::min(math::max(Local6,0.0),1.0);
+	float3 Local8 = math::lerp(Local4,float3(Dirtcolor.x,Dirtcolor.y,Dirtcolor.z),Local7);
+	float Local9 = math::lerp(Metallic,0.0,Local7);
+	float Local10 = math::lerp(spec,DirtSpec,Local7);
+	float Local11 = math::lerp(Roughness,DirtRoughness,Local7);
+	float Local12 = math::lerp(MinOpacity,MaxOpacity,Local3);
+	float Local13 = math::lerp(Local12,DirtOpacity,Local7);
+
+	float3 EmissiveColor_mdl = Local2;
+	float Opacity_mdl = Local13;
+	float OpacityMask_mdl = (math::saturate(Local13) - 1.0f / 255.0f) < 0.0f ? 0.0f : 1.0f;
+	float3 BaseColor_mdl = Local8;
+	float Metallic_mdl = Local9;
+	float Specular_mdl = Local10;
+	float Roughness_mdl = Local11;
+	float2 Refraction_mdl = float2(float2(1.0,0.0).x,float2(1.0,0.0).x);
+
+	} in
+		::OmniUe4Translucent(
+			base_color: BaseColor_mdl,
+			metallic: Metallic_mdl,
+			roughness: Roughness_mdl,
+			specular: Specular_mdl,
+			normal: Normal_mdl,
+			opacity: Opacity_mdl,
+			opacity_mask: OpacityMask_mdl,
+			emissive_color: EmissiveColor_mdl,
+			displacement: WorldPositionOffset_mdl,
+			refraction: Refraction_mdl.x,
+			two_sided: false);

@@ -11,17 +11,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import argparse
 import subprocess
 import sys
+import unittest
 from pathlib import Path
 
-import bpy
+try:
+    import bpy
+except ImportError:
+    print("Blender is not installed. Please install Blender.")
+    sys.exit(1)
 import pip
 
 from .parse_mdl import parse_mdl
 from .utils import get_preview_texture_path, get_texture_path
-
 
 bl_info = {
     "name" : "USD-preview-replacer",
@@ -209,6 +213,24 @@ class OmniversePreviewReplaceSelected(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class RunTests(bpy.types.Operator):
+    """
+    This operator runs the tests
+    """
+    bl_idname = "usd_preview_replacer.run_tests"
+    bl_label = "Run Tests"
+
+    def execute(self, context):
+        """
+        It runs the tests
+        :param context: The context of the operator
+        :return: The return value is a dictionary of the form {'FINISHED'}
+        """
+        sys.argv = [__file__] + (sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
+        unittest.main(argv=sys.argv[0:1]+remaining)
+        return {'FINISHED'}
+
+
 class OmniversePreviewsReplacerPanel(bpy.types.Panel):
     
     bl_idname = 'VIEW3D_PT_omniverse_replacer_previews'
@@ -231,7 +253,6 @@ class OmniversePreviewsReplacerPanel(bpy.types.Panel):
             row.prop(context.scene, prop_name)
 
         col.operator('opr.replace_selected_previews', text='Replace Previews')
-        #col.operator('opr.replace_selected_previews', text='Restore Previews')
 
 
 
@@ -239,12 +260,12 @@ PROPS = [
     ('usd_file_path', bpy.props.StringProperty(name='USD File', default='', subtype='FILE_PATH')),
     ('is_diffuse_selected', bpy.props.BoolProperty(name='Diffuse', default=True, description='Replace diffuse textures')),
     ('is_normal_selected', bpy.props.BoolProperty(name='Normal', default=True, description='Replace normal textures')),
-    ('is_specular_selected', bpy.props.BoolProperty(name='Specular', default=True, description='Replace specular textures')),
-    ('is_roughness_selected', bpy.props.BoolProperty(name='Roughness', default=True, description='Replace roughness textures')),
-    ('is_metallic_selected', bpy.props.BoolProperty(name='Metallic', default=True, description='Replace metallic textures')),
-    ('is_emissive_selected', bpy.props.BoolProperty(name='Emissive', default=True, description='Replace emissive textures')),
-    ('is_opacity_selected', bpy.props.BoolProperty(name='Metallic', default=True, description='Replace metallic textures')),
-    ('is_ao_selected', bpy.props.BoolProperty(name='AO', default=True, description='Replace AO textures')),
+    ('is_specular_selected', bpy.props.BoolProperty(name='Specular', default=False, description='Replace specular textures')),
+    ('is_roughness_selected', bpy.props.BoolProperty(name='Roughness', default=False, description='Replace roughness textures')),
+    ('is_metallic_selected', bpy.props.BoolProperty(name='Metallic', default=False, description='Replace metallic textures')),
+    ('is_emissive_selected', bpy.props.BoolProperty(name='Emissive', default=False, description='Replace emissive textures')),
+    ('is_opacity_selected', bpy.props.BoolProperty(name='Metallic', default=False, description='Replace metallic textures')),
+    ('is_ao_selected', bpy.props.BoolProperty(name='AO', default=False, description='Replace AO textures')),
     ('usd_replace_selected', bpy.props.BoolProperty(name='Only Selected Meshes', default=True, description='Take action only to selected objects, uncheck to select all objects in the scene')),
 ]
 

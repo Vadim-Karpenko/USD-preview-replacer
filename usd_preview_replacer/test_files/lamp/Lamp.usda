@@ -1,0 +1,37 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Perspective = {
+                double3 position = (-28228.20839861255, -28538.805641198243, 589.3229883867114)
+                double3 target = (-29158.237374879856, -28906.144712339792, 578.9253869298633)
+            }
+        }
+        dictionary renderSettings = {
+            float "rtx:reflections:maxRoughness" = 1
+        }
+    }
+    defaultPrim = "Root"
+    endTimeCode = 0
+    metersPerUnit = 0.01
+    startTimeCode = 0
+    timeCodesPerSecond = 24
+    upAxis = "Z"
+)
+
+def Xform "Root" (
+    kind = ""
+)
+{
+    def Xform "SM_LampPost203_974" (
+        kind = "group"
+        prepend references = @./Props/SM_LampPost01.usda@
+    )
+    {
+        quatd xformOp:orient = (1, -0, 0, -0)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (-29839.4453125, -26126.939453125, 100.001220703125)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+}
+
