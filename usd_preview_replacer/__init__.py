@@ -85,6 +85,10 @@ class OmniversePreviewReplaceSelected(bpy.types.Operator):
 
                 if material_type == None:
                     material_name = material.GetName()
+                    # We are checking every possible material type, trying to get the texture maps from the parameters in usd file, but since they are
+                    # not always present, we are checking if the texture map is present in the mdl file as well.
+                    # get_texture_path - gets the texture path from the inputs in the usd file
+                    # mdl_material_data - gets the texture maps from the mdl file
                     if scene_context.is_diffuse_selected:
                         allowed_params = ["inputs:Albedo", "inputs:BaseColor", "inputs:Diffuse", "inputs:albedo", "inputs:baseColor", "inputs:diffuse"]
                         material_data["main"]["base_color"] = get_texture_path(material, allowed_params) or mdl_material_data.get("base_color", {}).get("texture_map")
@@ -110,6 +114,7 @@ class OmniversePreviewReplaceSelected(bpy.types.Operator):
                         allowed_params = ["inputs:AO", "inputs:ao", "inputs:AO_map", "inputs:ao_map", "inputs:AmbientOcclusion", "inputs:ambientOcclusion"]
                         material_data["main"]["ao"] = get_texture_path(material, allowed_params) or mdl_material_data.get("ao")
                 elif material_type == "UsdUVTexture":
+                    # Get preview textures for latter use
                     mat_type, path = get_preview_texture_path(material)
                     material_data["preview"][mat_type] = path
             if material_name:
@@ -160,6 +165,12 @@ class OmniversePreviewReplaceSelected(bpy.types.Operator):
 
 
     def execute(self, context):
+        """
+        It takes the USD file path, opens it, gets the materials, and then replaces the images in the Blender materials with the images from the USD file
+        
+        :param context: The context of the operator
+        :return: The return value is a dictionary of the form {'FINISHED'}
+        """
         if not context.scene.usd_file_path:
             return None
 
@@ -195,10 +206,6 @@ class OmniversePreviewReplaceSelected(bpy.types.Operator):
                                             node.image = bpy.data.images.load(image_path)
                                             if image_type == "normal":
                                                 node.image.colorspace_settings.name = "Non-Color"
-                                   #print(" texture: "+str(node.image.name))
-
-        
-
         return {'FINISHED'}
 
 
